@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ChainFlow — Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"></head><body>
+<canvas id="ambient"></canvas>
+<div class="nav"><div class="container navin"><div class="brand"><div class="logo"><span>⛓</span></div>ChainFlow</div><nav class="links"><a href="index.html">Overview</a><a href="buffer.html">Network Buffer</a><a href="mempool.html">MemPool</a><a href="builder.html">Block Builder</a><a href="explorer.html">Explorer</a><a href="rollback.html">Rollback</a><a href="simulator.html">Simulator</a><a href="analytics.html">Analytics</a></nav><div class="online">SIMULATION ONLINE</div></div><div class="container"><div class="contextbar"><div class="context-left"><span class="dot"></span><b>LOCAL SIMULATION</b><span>·</span><span>STATE SHARED ACROSS MODULES</span></div><div class="context-right">CHAINFLOW / OPERATIONS</div></div></div></div>
+<div class="container">
+<section class="hero"><div class="eyebrow">02 · ANALYTICS LAB</div>
+<h1>Measure the <span class="grad">algorithms.</span></h1>
+<p>Search mined transactions and benchmark Quick Sort against Radix Sort on the same integer datasets used by the project specification.</p>
+</section>
+<section class="grid two">
+<div class="card"><h2>Transaction Search</h2><div class="sub">Looks across mined blockchain transactions.</div>
+<input id="searchId" placeholder="Enter mined transaction ID">
+<div class="actions" style="margin-top:10px"><button onclick="runSearch('binary')">Binary Search</button><button class="secondary" onclick="runSearch('sentinel')">Sentinel Search</button></div><div id="searchResult" style="margin-top:10px"></div>
+</div>
+<div class="card"><h2>Benchmark Engine</h2><div class="sub">Quick Sort vs Radix Sort · N = 100, 1,000, 10,000.</div>
+<div class="actions"><button onclick="runBenchmark()">Run Benchmark</button><button class="secondary" onclick="resetProject()">Reset Simulation</button></div><div id="bench" style="margin-top:8px"></div>
+</div></section>
+<section class="grid two sectiongap">
+<div class="card"><h2>Gas Density Distribution</h2><div class="sub">Recent transactions · Fee / Byte Size.</div><div class="chart" id="densityChart"></div></div>
+<div class="card"><h2>Rollback Stack</h2><div class="sub">Recent blocks stored in LIFO order.</div><div class="stack" id="rollbackStack"></div></div>
+</section>
+<section class="card sectiongap"><h2>CI2001 Implementation Map</h2><div class="sub">Direct mapping to the supplied project guide.</div>
+<div class="tablewrap"><table><thead><tr><th>Subsystem</th><th>Data Structure</th><th>Operation</th><th>Complexity</th></tr></thead><tbody>
+<tr><td>Network Receiver</td><td>Input-Restricted Deque</td><td>Normal back / urgent front</td><td class="mono">O(1)</td></tr>
+<tr><td>MemPool</td><td>Max-Priority Queue</td><td>Fee / byte priority</td><td class="mono">Insert O(log n)</td></tr>
+<tr><td>Blockchain</td><td>Doubly Linked List</td><td>Append + bidirectional links</td><td class="mono">Append O(1)</td></tr>
+<tr><td>Fork Rollback</td><td>LIFO Stack</td><td>Pop latest block + return TXs</td><td class="mono">Push / Pop O(1)</td></tr>
+<tr><td>Tx Lookup</td><td>Binary + Sentinel Search</td><td>Mined transaction search</td><td class="mono">Binary O(log n)</td></tr>
+<tr><td>Sorting Engine</td><td>Quick + Radix Sort</td><td>Integer benchmark</td><td class="mono">O(n log n) / O(d·n)</td></tr>
+</tbody></table></div>
+</section>
+<section class="card sectiongap"><h2>Viva-ready explanation</h2><div class="sub">Why the algorithms are included.</div>
+<div class="result"><b>Quick Sort:</b> comparison-based sorting with average O(n log n).<br>
+<b>Radix Sort:</b> non-comparison integer sorting with O(d·n).<br>
+<b>Binary Search:</b> logarithmic lookup after ordering the IDs.<br>
+<b>Sentinel Search:</b> linear lookup using a sentinel to simplify the loop condition.</div>
+</section>
+</div><div class="footer">CHAINFLOW · CI2001 FUNDAMENTALS OF DATA STRUCTURES · BLOCKCHAIN MEMPOOL SCHEDULER & BLOCK BUILDER</div>
+<div id="toast" class="toast" style="position:fixed;right:20px;bottom:20px;z-index:80;padding:12px 15px;border:1px solid var(--line);border-radius:12px;background:rgba(251,252,254,.94);box-shadow:var(--shadow);font-size:11px;opacity:0;transform:translateY(10px);transition:.2s;pointer-events:none"></div>
+<script src="app.js"></script><script>
+function txRows(a){
+ if(!a.length)return '<div class="empty">Nothing here yet.</div>';
+ return `<div class="tablewrap"><table><thead><tr><th>ID</th><th>Fee</th><th>Size</th><th>Density</th><th>Type</th></tr></thead><tbody>${
+ a.map(x=>`<tr><td class="mono">${x.id}</td><td>${x.fee}</td><td>${x.size}</td><td class="mono">${x.density.toFixed(4)}</td><td><span class="badge ${x.urgent?'urgent':''}">${x.urgent?'URGENT':'NORMAL'}</span></td></tr>`).join("")
+ }</tbody></table></div>`
+}
+function chainCards(a){
+ return a.map(b=>`<div class="block"><div class="num">BLOCK #${b.index}</div><h3>${b.txs.length} transaction${b.txs.length===1?'':'s'}</h3><p>HASH · ${b.hash}</p><p>PREV · ${b.prev}</p><p>SIZE · ${b.txs.reduce((s,x)=>s+x.size,0)} bytes</p></div>`).join("")
+}
+
+window.runSearch=function(type){
+ const id=document.getElementById("searchId").value.trim(); if(!id){toast("Enter a transaction ID");return}
+ const a=instances().chain.items().flatMap(b=>b.txs||[]).map(txFrom); const t=performance.now(); const f=type==="binary"?binarySearch(id,a):sentinelSearch(id,a); const ms=(performance.now()-t).toFixed(3);
+ document.getElementById("searchResult").innerHTML=`<div class="result"><b>${f?"Found":"Not found"}</b> · ${type==="binary"?"Binary Search":"Sentinel Search"} · ${ms} ms${f?`<br><span class="mono">${f.id} · fee ${f.fee} · size ${f.size} · density ${f.density.toFixed(4)}</span>`:""}</div>`;
+}
+window.runBenchmark=function(){
+ const r=benchmark(),mx=Math.max(...r.flatMap(x=>[x.q,x.r]));
+ document.getElementById("bench").innerHTML=r.map(x=>`<div class="barrow"><span>N=${x.n.toLocaleString()}</span><div class="bar"><div class="fill" style="width:${Math.max(5,x.q/mx*100)}%"></div></div><span>Q ${x.q.toFixed(2)}ms</span></div><div class="barrow"><span></span><div class="bar"><div class="fill" style="width:${Math.max(5,x.r/mx*100)}%"></div></div><span>R ${x.r.toFixed(2)}ms</span></div>`).join("");
+}
+window.renderPage=function(){
+ const {chain,stack}=instances(); const txs=[...STATE.buffer,...STATE.pool,...chain.items().flatMap(b=>b.txs||[])].slice(-14).map(txFrom); const max=Math.max(...txs.map(x=>x.density),1);
+ const dc=document.getElementById("densityChart"); if(dc)dc.innerHTML=txs.length?txs.map(x=>`<i title="${x.id}: ${x.density.toFixed(4)}" style="height:${Math.max(8,x.density/max*170)}px"></i>`).join(""):'<div class="empty">Add transactions to populate this view.</div>';
+ const rs=document.getElementById("rollbackStack"); const arr=stack.items().slice().reverse(); if(rs)rs.innerHTML=arr.length?arr.map(b=>`<div class="stackitem">BLOCK #${b.index} · ${b.txs.length} TX · ROLLBACK READY</div>`).join(""):'<div class="empty">Genesis only.</div>';
+}
+</script></body></html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ChainFlow — Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"></head><body>
+<canvas id="ambient"></canvas>
+<div class="nav"><div class="container navin"><div class="brand"><div class="logo"><span>⛓</span></div>ChainFlow</div><nav class="links"><a href="index.html">Overview</a><a href="buffer.html">Network Buffer</a><a href="mempool.html">MemPool</a><a href="builder.html">Block Builder</a><a href="explorer.html">Explorer</a><a href="rollback.html">Rollback</a><a href="simulator.html">Simulator</a><a href="analytics.html">Analytics</a></nav><div class="online">SIMULATION ONLINE</div></div><div class="container"><div class="contextbar"><div class="context-left"><span class="dot"></span><b>LOCAL SIMULATION</b><span>·</span><span>STATE SHARED ACROSS MODULES</span></div><div class="context-right">CHAINFLOW / OPERATIONS</div></div></div></div>
+<div class="container">
+<section class="hero"><div class="eyebrow">01 · LIVE SIMULATOR</div>
+<h1>Control the <span class="grad">transaction pipeline.</span></h1>
+<p>Create transactions, observe their gas density, move them through the MemPool, build blocks, and reverse the latest block.</p>
+</section>
+<section class="grid stats">
+<div class="stat"><small>Buffer</small><strong data-buffer-count>0</strong></div>
+<div class="stat"><small>MemPool</small><strong data-pool-count>0</strong></div>
+<div class="stat"><small>Blocks</small><strong data-block-count>1</strong></div>
+<div class="stat"><small>Status</small><strong data-chain-status style="color:var(--green)">VALID</strong></div>
+</section>
+<section class="card sectiongap"><h2>Transaction Console</h2><div class="sub">Gas density = fee ÷ byte size. Use small fees/sizes for a quick demo.</div>
+<div class="formgrid"><input id="txId" placeholder="Transaction ID e.g. TX1001"><input id="txFee" type="number" min="1" placeholder="Fee"><input id="txSize" type="number" min="1" placeholder="Byte size"></div>
+<div class="actions" style="margin-top:11px"><button onclick="addTransaction(false)">Add Normal</button><button class="blue" onclick="addTransaction(true)">Add Urgent</button><button class="secondary" onclick="moveBuffer()">Buffer → MemPool</button><button class="secondary" onclick="mineBlock()">Build 1 MB Block</button><button class="danger" onclick="rollbackBlock()">Rollback Latest Block</button></div>
+</section>
+<section class="card sectiongap"><div class="sectionhead"><div><h2>Network Control Room</h2><div class="sub">Tune the simulated network and generate a burst of incoming traffic.</div></div><span class="badge">CONTROL PLANE</span></div>
+<div class="formgrid"><label class="controlfield">Block capacity (MB)<input id="capacityMB" type="number" min="0.01" max="16" step="0.25" value="1"></label><label class="controlfield">Congestion level<select id="congestion"><option value="low">Low · relaxed arrivals</option><option value="medium" selected>Medium · normal traffic</option><option value="high">High · burst traffic</option></select></label><label class="controlfield">Batch size<input id="batchSize" type="number" min="1" max="500" value="25"></label></div>
+<div class="actions" style="margin-top:12px"><button class="blue" onclick="generateBatch()">Generate Traffic Burst</button><button class="secondary" onclick="stepSimulation()">Process One Step</button><button class="secondary" onclick="exportSnapshot()">Export Snapshot</button></div></section>
+<section class="grid four sectiongap"><div class="stat"><small>Transactions processed</small><strong id="processedCount">0</strong></div><div class="stat"><small>Block utilization</small><strong id="utilization">—</strong></div><div class="stat"><small>Avg. fee density</small><strong id="avgDensity">—</strong></div><div class="stat"><small>Pending workload</small><strong id="pendingBytes">0 B</strong></div></section>
+<section class="grid two sectiongap">
+<div class="card"><h2>Network Buffer</h2><div class="sub">Input-restricted deque.</div><div id="bufferTable"></div></div>
+<div class="card"><h2>MemPool</h2><div class="sub">Max-priority heap ordered by gas density.</div><div id="poolTable"></div></div>
+</section>
+<section class="card sectiongap"><h2>Blockchain</h2><div class="sub">Doubly linked list · newest block is on the right.</div><div id="chain" class="chain"></div></section>
+</div><div class="footer">CHAINFLOW · TRANSACTION ORCHESTRATION & BLOCK BUILDER</div>
+<div id="toast" class="toast" style="position:fixed;right:20px;bottom:20px;z-index:80;padding:12px 15px;border:1px solid var(--line);border-radius:12px;background:rgba(251,252,254,.94);box-shadow:var(--shadow);font-size:11px;opacity:0;transform:translateY(10px);transition:.2s;pointer-events:none"></div>
+<script src="app.js"></script><script>
+function txRows(a){
+ if(!a.length)return '<div class="empty">Nothing here yet.</div>';
+ return `<div class="tablewrap"><table><thead><tr><th>ID</th><th>Fee</th><th>Size</th><th>Density</th><th>Type</th></tr></thead><tbody>${
+ a.map(x=>`<tr><td class="mono">${x.id}</td><td>${x.fee}</td><td>${x.size}</td><td class="mono">${x.density.toFixed(4)}</td><td><span class="badge ${x.urgent?'urgent':''}">${x.urgent?'URGENT':'NORMAL'}</span></td></tr>`).join("")
+ }</tbody></table></div>`
+}
+function chainCards(a){
+ return a.map(b=>`<div class="block"><div class="num">BLOCK #${b.index}</div><h3>${b.txs.length} transaction${b.txs.length===1?'':'s'}</h3><p>HASH · ${b.hash}</p><p>PREV · ${b.prev}</p><p>SIZE · ${b.txs.reduce((s,x)=>s+x.size,0)} bytes</p></div>`).join("")
+}
+
+window.renderPage=function(){
+ const {buffer,pool,chain,stack}=instances();
+ const b=document.getElementById("bufferTable"),p=document.getElementById("poolTable"),c=document.getElementById("chain");
+ if(b)b.innerHTML=txRows(buffer.items()); if(p)p.innerHTML=txRows(pool.items()); if(c)c.innerHTML=chainCards(chain.items());
+ const mined=chain.items().flatMap(x=>x.txs||[]),pending=[...buffer.items(),...pool.items()],latest=chain.tail.data;
+ const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+ set("processedCount",mined.length.toLocaleString());set("utilization",latest.index?`${Math.round((latest.txs.reduce((n,t)=>n+t.size,0)/(latest.capacity||1048576))*100)}%`:"—");
+ set("avgDensity",pending.length?(pending.reduce((n,t)=>n+t.density,0)/pending.length).toFixed(3):"—");set("pendingBytes",pending.reduce((n,t)=>n+t.size,0).toLocaleString()+" B");
+}
+</script></body></html>

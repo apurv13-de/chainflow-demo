@@ -1,0 +1,114 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ChainFlow — Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"></head><body>
+<canvas id="ambient"></canvas>
+<div class="nav"><div class="container navin"><div class="brand"><div class="logo"><span>⛓</span></div>ChainFlow</div><nav class="links"><a href="index.html">Overview</a><a href="buffer.html">Network Buffer</a><a href="mempool.html">MemPool</a><a href="builder.html">Block Builder</a><a href="explorer.html">Explorer</a><a href="rollback.html">Rollback</a><a href="simulator.html">Simulator</a><a href="analytics.html">Analytics</a></nav><div class="online">SIMULATION ONLINE</div></div><div class="container"><div class="contextbar"><div class="context-left"><span class="dot"></span><b>LOCAL SIMULATION</b><span>·</span><span>STATE SHARED ACROSS MODULES</span></div><div class="context-right">CHAINFLOW / OPERATIONS</div></div></div></div>
+<div class="container">
+<section class="hero">
+  <div class="eyebrow">CHAINFLOW · TRANSACTION INFRASTRUCTURE</div>
+  <h1>Intelligent transaction flow, <span class="grad">built for blocks.</span></h1>
+  <p>ChainFlow is an interactive transaction orchestration environment that models how incoming transactions are queued, prioritized, packed into blocks, linked into a ledger, and safely reversed when required.</p>
+  <div class="pills">
+    <span class="pill">TRANSACTION QUEUE</span>
+    <span class="pill">FEE DENSITY</span>
+    <span class="pill">BLOCK BUILDER</span>
+    <span class="pill">LEDGER</span>
+    <span class="pill">ROLLBACK</span>
+    <span class="pill">SEARCH & SORT</span>
+  </div>
+</section>
+
+<section class="grid stats">
+  <div class="stat"><small>Transactions in Buffer</small><strong data-buffer-count>0</strong></div>
+  <div class="stat"><small>Transactions in MemPool</small><strong data-pool-count>0</strong></div>
+  <div class="stat"><small>Blocks on Chain</small><strong data-block-count>1</strong></div>
+  <div class="stat"><small>Ledger Integrity</small><strong data-chain-status style="color:var(--green)">VALID</strong></div>
+</section>
+
+<section class="grid three sectiongap">
+  <div class="card feature">
+    <div class="num">01</div><span class="tag">INGESTION</span>
+    <h3>Capture & route</h3>
+    <p>Incoming transactions are organized through a controlled queueing layer, with urgent traffic able to take a priority entry path.</p>
+  </div>
+  <div class="card feature">
+    <div class="num">02</div><span class="tag">OPTIMIZATION</span>
+    <h3>Prioritize by density</h3>
+    <p>The transaction pool continuously ranks candidates using fee density, creating an efficient basis for block selection.</p>
+  </div>
+  <div class="card feature">
+    <div class="num">03</div><span class="tag">SETTLEMENT</span>
+    <h3>Build the ledger</h3>
+    <p>Selected transactions are packed into capacity-limited blocks and connected into a verifiable chain with rollback support.</p>
+  </div>
+</section>
+
+<section class="card sectiongap">
+  <h2>Transaction Processing Architecture</h2>
+  <div class="sub">A modular flow from arrival to settlement.</div>
+  <div class="pipeline">
+    <div class="node"><b>Ingress</b><span>Input queue</span></div><div class="arrow">→</div>
+    <div class="node"><b>MemPool</b><span>Priority engine</span></div><div class="arrow">→</div>
+    <div class="node"><b>Block Builder</b><span>Capacity control</span></div><div class="arrow">→</div>
+    <div class="node"><b>Ledger</b><span>Linked blocks</span></div><div class="arrow">→</div>
+    <div class="node"><b>Recovery</b><span>Rollback stack</span></div>
+  </div>
+</section>
+
+<section class="grid two sectiongap">
+  <div class="card executive">
+    <div class="eyebrow">CORE ENGINE</div>
+    <h2>One workflow. Multiple algorithmic layers.</h2>
+    <p>Every stage has a defined responsibility: queue incoming traffic, rank transactions, construct blocks, maintain chain relationships, reverse recent state, and analyze lookup and sorting performance.</p>
+    <div class="objective">
+      <span>DESIGN PRINCIPLE</span>
+      <b>Prioritize high-value transactions, maximize block utilization, and keep ledger state recoverable.</b>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">SYSTEM SNAPSHOT</div>
+    <h2>Operating parameters</h2>
+    <div class="specgrid">
+      <div><span>PRIORITY METRIC</span><b>Fee / Byte</b></div>
+      <div><span>BLOCK CAPACITY</span><b>1 MB</b></div>
+      <div><span>QUEUE MODEL</span><b>Restricted Deque</b></div>
+      <div><span>POOL MODEL</span><b>Max Priority Heap</b></div>
+      <div><span>LEDGER MODEL</span><b>Doubly Linked</b></div>
+      <div><span>RECOVERY MODEL</span><b>LIFO Stack</b></div>
+    </div>
+  </div>
+</section>
+
+<section class="grid three sectiongap">
+  <div class="card feature">
+    <div class="num">04</div><span class="tag">VERIFICATION</span>
+    <h3>Fast lookup</h3>
+    <p>Binary Search and Sentinel Search provide two distinct approaches for locating transactions in the settled ledger.</p>
+  </div>
+  <div class="card feature">
+    <div class="num">05</div><span class="tag">ANALYTICS</span>
+    <h3>Algorithm benchmarks</h3>
+    <p>Quick Sort and Radix Sort can be measured across increasing transaction volumes to visualize execution behavior.</p>
+  </div>
+  <div class="card feature">
+    <div class="num">06</div><span class="tag">CONTROL</span>
+    <h3>Recoverable state</h3>
+    <p>Recent block history is retained separately so the latest committed state can be reversed without rebuilding the entire chain.</p>
+  </div>
+</section>
+</div><div class="footer">CHAINFLOW · TRANSACTION ORCHESTRATION & BLOCK BUILDER</div>
+<div id="toast" class="toast" style="position:fixed;right:20px;bottom:20px;z-index:80;padding:12px 15px;border:1px solid var(--line);border-radius:12px;background:rgba(251,252,254,.94);box-shadow:var(--shadow);font-size:11px;opacity:0;transform:translateY(10px);transition:.2s;pointer-events:none"></div>
+<script src="app.js"></script><script>
+function txRows(a){
+ if(!a.length)return '<div class="empty">Nothing here yet.</div>';
+ return `<div class="tablewrap"><table><thead><tr><th>ID</th><th>Fee</th><th>Size</th><th>Density</th><th>Type</th></tr></thead><tbody>${
+ a.map(x=>`<tr><td class="mono">${x.id}</td><td>${x.fee}</td><td>${x.size}</td><td class="mono">${x.density.toFixed(4)}</td><td><span class="badge ${x.urgent?'urgent':''}">${x.urgent?'URGENT':'NORMAL'}</span></td></tr>`).join("")
+ }</tbody></table></div>`
+}
+function chainCards(a){
+ return a.map(b=>`<div class="block"><div class="num">BLOCK #${b.index}</div><h3>${b.txs.length} transaction${b.txs.length===1?'':'s'}</h3><p>HASH · ${b.hash}</p><p>PREV · ${b.prev}</p><p>SIZE · ${b.txs.reduce((s,x)=>s+x.size,0)} bytes</p></div>`).join("")
+}
+</script></body></html>
